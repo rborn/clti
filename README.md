@@ -1,31 +1,30 @@
 ## Overview
 
-[Titanium](https://github.com/appcelerator/titanium) is a [Command Line Tool (CLI)](http://en.wikipedia.org/wiki/Command-line_interface) for managing and deploying Titanium mobile applications and modules. It's open-source and easy to use. [We've](https://github.com/appcelertor) designed `titanium` to be suitable for command line beginners, but still be powerful and extensible enough for production usage.
+[CLTI](https://github.com/iamyellow/clti) is a [Command Line Tool (CLI)](http://en.wikipedia.org/wiki/Command-line_interface) I use for working with [Appcelerator Titanium](https://github.com/appcelertor). It means it only fits my needs (but maybe somebody's else needs too). So, as I'm on a Mac (running ML) I guess it won't run in Windows / Linux.
 
-`titanium` requires `npm`, the [node package manager](http://npmjs.org).
+Originally `CLTI` was a fork of [Titanium](https://github.com/appcelerator/titanium), but after too much changes I cannot consider a real fork anymore.
 
-## One-line npm install
+## CLTI install
 
-    [sudo] curl http://npmjs.org/install.sh | sh
+`clti` requires `npm`, the [node package manager](http://npmjs.org), but I have not published in npm registry. What works for me is just link it...
 
+	[sudo] npm link
 
-## One-line titanium install
+So in order to install, just clone this repo, go to the directory and run that command. Uninstall is also easy:
 
-    [sudo] npm install titanium -g
+	[sudo] npm uninstall clti -g
 
-<a name="Libraries"></a>
-## Libraries
-`titanium` is built on a few well developed, well maintained Node.js libraries. 
+## Use
 
-- [npm](http://npmjs.org) - Node Package Manager
-- [colors](https://github.com/marak/colors.js) - Terminal Colors module
-- [optimist](https://github.com/substack/node-optimist) - CLI Options Parsing
+First of all you must configure CLTI, telling where is Titanium and which is the default SDK.
 
+	clti config --ti=/Library/Application Support/Titanium --sdk=2.1.2.GA
 
-<a name="License"></a>
+Now type run CLTI and just try ;)
+
 ## License
 
 This project is open source and provided under the Apache Public License (version 2). Please make sure you see the `LICENSE` file
 included in this distribution for more details on the license.  Also, please take notice of the privacy notice at the end of the file.
 
-#### (C) Copyright 2012, [Appcelerator](http://www.appcelerator.com) Inc. All Rights Reserved.
+#### (C) Copyright 2012, [iamyellow.net](http://iamyellow.net) Inc. All Rights Reserved.
