@@ -1,6 +1,6 @@
 {
 	"name": "clti",
-	"description": "CommandLineTitaniumInterface",
+	"description": "(c)ommand(l)ine(t)itanium(i)nterface",
 	"keywords": [
 		"appcelerator",
 		"titanium",
@@ -12,7 +12,7 @@
 	"version": "0.1.0",
 	"author": "iamyellow.net",
 	"maintainers": [
-		"Bill Dawson <jordi@iamyellow.net>"
+		"jordi domenech <jordi@iamyellow.net>"
 	],
 	"repository": {
 		"type": "git",
@@ -20,7 +20,6 @@
 	},
 	"preferGlobal": true,
 	"dependencies": {
-		"zip":"0.0.6",
 		"xml2json": "0.2.4",
 		"colors": "0.6.0-1",
 		"optimist": "0.3.4"
