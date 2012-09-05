@@ -1,8 +1,10 @@
 ## Overview
 
-[CLTI](https://github.com/iamyellow/clti) is a [Command Line Tool (CLI)](http://en.wikipedia.org/wiki/Command-line_interface) I use for working with [Appcelerator Titanium](https://github.com/appcelertor). It means it only fits my needs (but maybe somebody's else needs too). So, as I'm on a Mac (running ML) I guess it won't run in Windows / Linux.
+[CLTI](https://github.com/iamyellow/clti) stands for (C)ommand(L)ine(T)itanium(I)ntertace, and was originally a fork of [Titanium](https://github.com/appcelerator/titanium), but after changing a lot of stuff, it cannot be considered a fork anymore. Now it's just a wrapper for Titanium's SDK python scripts.
 
-Originally `CLTI` was a fork of [Titanium](https://github.com/appcelerator/titanium), but after too much changes I cannot consider a real fork anymore.
+## Notice
+
+- I'm on a Mac (running ML), so I guess it won't run in Windows / Linux / maybe OS X < 10.8.
 
 ## CLTI install
 
@@ -16,11 +18,20 @@ So in order to install, just clone this repo, go to the directory and run that c
 
 ## Use
 
-First of all you must configure CLTI, telling where is Titanium and which is the default SDK.
-
+	// First of all you must configure CLTI, telling where is Titanium and which is the default SDK.
 	clti config --ti=/Library/Application Support/Titanium --sdk=2.1.2.GA
 
-Now type run CLTI and just try ;)
+	// help
+	clti 
+
+	// run (must be in the project root directory)
+	clti run --iphone
+	clti run --android
+	// forcing rebuild
+	clti run --iphone -f
+
+	// run the project in the simulator using the original python script titanium.py, using the default sdk
+	clti py run --platform=iphone
 
 ## License
 
