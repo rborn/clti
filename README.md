@@ -26,9 +26,19 @@ So in order to install, just clone this repo, go to the directory and run that c
 
 	// run (must be in the project root directory)
 	clti run --iphone
+	clti run --ipad
 	clti run --android
 	// forcing rebuild
 	clti run --iphone -f
+
+	// deploy to idevice using fruitstrap (the device must be plugged)
+	clti deploy --ios
+	// universal
+	clti deploy --ios --universal
+	// ipad-only app
+	clti deploy --ios --ipad
+	// builds with Debug configuration
+	clti deploy --ios --debug
 
 	// run the project in the simulator using the original python script titanium.py, using the default sdk
 	clti py run --platform=iphone
