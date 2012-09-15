@@ -9,7 +9,7 @@
 		"iphone",
 		"android"
 	],
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"author": "iamyellow.net",
 	"maintainers": [
 		"jordi domenech <jordi@iamyellow.net>"
@@ -20,10 +20,10 @@
 	},
 	"preferGlobal": true,
 	"dependencies": {
-		"xml2json": "0.2.4",
-		"colors": "0.6.0-1",
-		"optimist": "0.3.4",
-		"shelljs": "0.0.6"
+		"xml2json": ">=0.3.1",
+		"colors": ">=0.6.0-1",
+		"optimist": ">=0.3.4",
+		"shelljs": ">=0.0.6"
 	},
 	"license":"Apache Public License v2",
 	"bin": {
