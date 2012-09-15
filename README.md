@@ -4,6 +4,7 @@
 
 ## Notice
 
+- My priority is make this work for iOS, so the start focus is on it.
 - I'm on a Mac (running ML), so I guess it won't run in Windows / Linux / maybe OS X < 10.8.
 
 ## CLTI install
@@ -18,20 +19,23 @@ So in order to install, just clone this repo, go to the directory and run that c
 
 ## Use
 
+	// CONFIG
 	// First of all you must configure CLTI, telling where is Titanium and which is the default SDK.
 	clti config --ti=/Library/Application Support/Titanium --sdk=2.1.2.GA
 
-	// help
+	// HELP
 	clti 
 
-	// run (must be in the project root directory)
+	// You MUST be in a Ti project root directory
+
+	// RUN
 	clti run --iphone
 	clti run --ipad
 	clti run --android
 	// forcing rebuild
 	clti run --iphone -f
 
-	// deploy to idevice using fruitstrap (the device must be plugged)
+	// DEPLOY
 	clti deploy --ios
 	// universal
 	clti deploy --ios --universal
@@ -40,7 +44,16 @@ So in order to install, just clone this repo, go to the directory and run that c
 	// builds with Debug configuration
 	clti deploy --ios --debug
 
-	// run the project in the simulator using the original python script titanium.py, using the default sdk
+	// PACKAGE
+	// CLTI prompts asking you to choose an identity and a mobile certificate :)
+	clti package --ios 
+	// universal
+	clti package --ios --universal
+	// ipad-only
+	clti package --ios --ipad
+
+	// BYPASS (use Titanium SDK Python scripts: titanium.py)
+	// (e.g. Run the project in the simulator)
 	clti py run --platform=iphone
 
 ## License
