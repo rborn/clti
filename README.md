@@ -7,13 +7,19 @@
 - My priority is make this work for iOS, so the start focus is on it.
 - I'm on a Mac (running ML), so I guess it won't run in Windows / Linux / maybe OS X < 10.8.
 
-## CLTI install
+## Installation
 
-`clti` requires `npm`, the [node package manager](http://npmjs.org), but I have not published in npm registry. What works for me is just link it...
+NPM [node package manager](http://npmjs.org) is required! Then:
+	
+	[sudo] npm install clti -g
 
+It's also possible to install CLTI clonning this repo and just linking it:
+
+	git clone https://github.com/iamyellow/clti
+	cd clti
 	[sudo] npm link
 
-So in order to install, just clone this repo, go to the directory and run that command. Uninstall is also easy:
+Uninstall:
 
 	[sudo] npm uninstall clti -g
 
