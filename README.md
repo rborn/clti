@@ -35,9 +35,12 @@ Uninstall:
 	// You MUST be in a Ti project root directory
 
 	// RUN
+	// (in iOS runs the simulator with the latest iOS SDK installed)
 	clti run --iphone
 	clti run --ipad
 	clti run --android
+	// running simulator with specific iOS version
+	clti run --iphone --ios=5.0
 	// forcing rebuild
 	clti run --iphone -f
 
