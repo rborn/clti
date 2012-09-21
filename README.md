@@ -36,13 +36,16 @@ Uninstall:
 
 	// RUN
 	// (in iOS runs the simulator with the latest iOS SDK installed)
-	clti run --iphone
-	clti run --ipad
+	clti run --ios --iphone
+	clti run --ios --ipad
 	clti run --android
-	// running simulator with specific iOS version
-	clti run --iphone --ios=5.0
+	// running simulator with specific iOS SDK version
+	clti run --ios --iphone --sdk=5.0
+	// EXPERIMENTAL: run simulator using waxsim, which seems quite faster than ios-sim
+	// (needs a previous 'normal' run)
+	clti run --ios --iphone -x
 	// forcing rebuild
-	clti run --iphone -f
+	clti run --ios --iphone -f
 
 	// DEPLOY
 	clti deploy --ios
@@ -50,8 +53,6 @@ Uninstall:
 	clti deploy --ios --universal
 	// ipad-only app
 	clti deploy --ios --ipad
-	// builds with Debug configuration
-	clti deploy --ios --debug
 
 	// PACKAGE
 	// CLTI prompts asking you to choose an identity and a mobile certificate :)
