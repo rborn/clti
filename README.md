@@ -35,15 +35,14 @@ Uninstall:
 	// You MUST be in a Ti project root directory
 
 	// RUN
-	// (in iOS runs the simulator with the latest iOS SDK installed)
+	// In order to speed up testing, don't quit the simulator, just CTRL+C in Terminal will quit the app :)
 	clti run --ios --iphone
+	clti run --ios --iphone4 (iPhone retina)
+	clti run --ios --iphone5 (iPhone 5)
 	clti run --ios --ipad
-	clti run --android
+	clti run --ios --ipad (iPad retina)
 	// running simulator with specific iOS SDK version
 	clti run --ios --iphone --sdk=5.0
-	// EXPERIMENTAL: run simulator using waxsim, which seems quite faster than ios-sim
-	// (needs a previous 'normal' run)
-	clti run --ios --iphone -x
 	// forcing rebuild
 	clti run --ios --iphone -f
 
