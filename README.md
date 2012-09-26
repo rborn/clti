@@ -36,13 +36,24 @@ Uninstall:
 
 	// RUN
 	// In order to speed up testing, don't quit the simulator, just CTRL+C in Terminal will quit the app :)
-	clti run --ios --iphone
-	clti run --ios --iphone4 (iPhone retina)
-	clti run --ios --iphone5 (iPhone 5)
+	clti run --ios --sim=iphone
+	// iphone retina
+	clti run --ios --sim=iphone4
+	// iphone 5
+	clti run --ios --sim=iphone5
+	// iPad/iPad2
+	clti run --ios --sim=ipad
+	// iPad retina
+	clti run --ios --sim=ipad3
+	
+	// running as universal app (could require rebuild)
+	clti run --ios --universal
+	// and ipad only
 	clti run --ios --ipad
-	clti run --ios --ipad (iPad retina)
-	// running simulator with specific iOS SDK version
-	clti run --ios --iphone --sdk=5.0
+
+	// running simulator with iOS 6, when app is build against 5.1 (could require rebuild)
+	clti run --ios --sdk=5.1 --sdksim=6.0
+	
 	// forcing rebuild
 	clti run --ios --iphone -f
 
@@ -52,6 +63,8 @@ Uninstall:
 	clti deploy --ios --universal
 	// ipad-only app
 	clti deploy --ios --ipad
+	// debug configuration
+	clti deploy --ios --debug
 
 	// PACKAGE
 	// CLTI prompts asking you to choose an identity and a mobile certificate :)
