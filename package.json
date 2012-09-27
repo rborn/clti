@@ -9,7 +9,7 @@
 		"iphone",
 		"android"
 	],
-	"version": "0.5.2",
+	"version": "0.6.0",
 	"author": "iamyellow.net",
 	"maintainers": [
 		"jordi domenech <jordi@iamyellow.net>"
@@ -22,7 +22,8 @@
 	"dependencies": {
 		"xml2js": ">=0.2.0",
 		"colors": ">=0.6.0-1",
-		"optimist": ">=0.3.4"
+		"optimist": ">=0.3.4",
+		"tsm": ">=1.0.1"
 	},
 	"license":"Apache Public License v2",
 	"bin": {
