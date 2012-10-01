@@ -703,15 +703,14 @@ def main(args):
 					custom_fonts.append(f)
 				
 
-		if (command != 'adhoc' and command != 'install'):
-			if not (simulator or build_only):
-				version = ti.properties['version']
-				# we want to make sure in debug mode the version always changes
-				version = "%s.%d" % (version,time.time())
-				if (deploytype != 'production'):
-					ti.properties['version']=version			
-					pp = os.path.expanduser("~/Library/MobileDevice/Provisioning Profiles/%s.mobileprovision" % appuuid)
-					provisioning_profile = read_provisioning_profile(pp,o)
+		if (command == 'distribute'):
+			version = ti.properties['version']
+			# we want to make sure in debug mode the version always changes
+			version = "%s.%d" % (version,time.time())
+			if (deploytype != 'production'):
+				ti.properties['version']=version			
+			pp = os.path.expanduser("~/Library/MobileDevice/Provisioning Profiles/%s.mobileprovision" % appuuid)
+			provisioning_profile = read_provisioning_profile(pp,o)
 
 			create_info_plist(ti, template_dir, project_dir, infoplist)
 
@@ -1136,22 +1135,21 @@ def main(args):
 			# build the final release distribution
 			args = []
 
-			if command not in ['simulator', 'build']:
-				if (command != 'adhoc' and command != 'install'):
-					# allow the project to have its own custom entitlements
-					custom_entitlements = os.path.join(project_dir,"Entitlements.plist")
-					entitlements_contents = None
-					if os.path.exists(custom_entitlements):
-						entitlements_contents = open(custom_entitlements).read()
-						o.write("Found custom entitlements: %s\n" % custom_entitlements)
-					else:
-						# attempt to customize it by reading prov profile
-						entitlements_contents = generate_customized_entitlements(provisioning_profile,appid,appuuid,command,o)
-					o.write("Generated the following entitlements:\n\n%s\n\n" % entitlements_contents)
-					f=open(os.path.join(iphone_resources_dir,'Entitlements.plist'),'w+')
-					f.write(entitlements_contents)
-					f.close()
-					args+=["CODE_SIGN_ENTITLEMENTS=Resources/Entitlements.plist"]
+			if command in ['distribute']:
+				# allow the project to have its own custom entitlements
+				custom_entitlements = os.path.join(project_dir,"Entitlements.plist")
+				entitlements_contents = None
+				if os.path.exists(custom_entitlements):
+					entitlements_contents = open(custom_entitlements).read()
+					o.write("Found custom entitlements: %s\n" % custom_entitlements)
+				else:
+					# attempt to customize it by reading prov profile
+					entitlements_contents = generate_customized_entitlements(provisioning_profile,appid,appuuid,command,o)
+				o.write("Generated the following entitlements:\n\n%s\n\n" % entitlements_contents)
+				f=open(os.path.join(iphone_resources_dir,'Entitlements.plist'),'w+')
+				f.write(entitlements_contents)
+				f.close()
+				args+=["CODE_SIGN_ENTITLEMENTS=Resources/Entitlements.plist"]
 
 			# only build if force rebuild (different version) or 
 			# the app hasn't yet been built initially
@@ -1179,7 +1177,7 @@ def main(args):
 				# in which case we get our logging jacked - we need to remove
 				# them before running the simulator
 
-				cleanup_app_logfiles(ti, log_id, iphone_version)
+				#cleanup_app_logfiles(ti, log_id, iphone_version)
 
 				script_ok = True
 				
