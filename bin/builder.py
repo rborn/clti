@@ -273,62 +273,63 @@ def generate_customized_entitlements(provisioning_profile,appid,uuid,command,out
 	
 	return buffer
 
-def is_indexing_enabled(tiapp, simulator_dir, **kwargs):
-	# darwin versions:
-	# - 9.x: Leopard (10.5)
-	# - 10.x: Snow Leopard (10.6)
-	# - 11.x: Lion (10.7)
+def distribute_xc4(name, icon, log):
+	# Locations of bundle, app binary, dsym info
+	log.write("Creating distribution for xcode4...\n");	
+	timestamp = datetime.datetime.now()
+	date = timestamp.date().isoformat()
+	time = timestamp.time().strftime('%H-%M-%S')
+	archive_name = os.path.join(date,'%s_%s' % (name, time))
+	archive_bundle = os.path.join(os.path.expanduser("~/Library/Developer/Xcode/Archives"),"%s.xcarchive" % archive_name)
+	archive_app = os.path.join(archive_bundle,"Products","Applications","%s.app" % name)
+	archive_dsym = os.path.join(archive_bundle,"dSYM")
+	
+	# create directories
+	if not os.access(archive_bundle, os.F_OK): os.makedirs(archive_bundle)
+	if not os.access(archive_app, os.F_OK): os.makedirs(archive_app)
+	if not os.access(archive_dsym, os.F_OK): os.makedirs(archive_dsym)
 
-	# for testing purposes
-	platform_release = kwargs.get("platform_release", platform.release())
-	darwin_version = [int(n) for n in platform_release.split(".")]
-
-	enable_mdfind = True
-	if tiapp.has_app_property('ti.ios.enablemdfind'):
-		enable_mdfind = tiapp.to_bool(tiapp.get_app_property('ti.ios.enablemdfind'))
-
-	# mdfind is specifically disabled, so don't use it
-	if not enable_mdfind:
-		return False
-
-	# pre-Leopard, mdfind / mdutil don't exist
-	if darwin_version[0] < 10:
-		return False
-
-	# for testing purposes
-	indexer_status = kwargs.get("indexer_status")
-	if indexer_status == None:
-		indexer_status = run.run(['mdutil', '-a', '-s'], True)
-
-	# An error occurred running mdutil, play it safe
-	if indexer_status == None:
-		return False
-
-	lines = indexer_status.splitlines()
-	mount_point_status = {}
-	for i in range(0, len(lines), 2):
-		mount_point = lines[i].rstrip(':')
-		if len(lines) > (i+1):
-			status = lines[i+1].strip('\t.')
-			# Only add mount points that the simulator_dir starts with
-			if simulator_dir.startswith(mount_point):
-				mount_point_status[mount_point] = status
-		# mdutil must be disabled if we don't get the right amount of output
-		else:
-			return False
-
-	if len(mount_point_status) > 0:
-		# There may be multiple volumes that have a mount point that the
-		# simulator_dir matches, so the one with the longest length
-		# *should* be the most specific / correct mount point.
-		mount_points = mount_point_status.keys()
-		mount_points.sort(lambda a, b: cmp(len(b), len(a)))
-		status = mount_point_status[mount_points[0]]
-
-		if 'Indexing enabled' in status:
-			return True
-
-	return False
+	# copy app bundles into the approps. places
+	os.system('ditto "%s.app" "%s"' % (name,archive_app))
+	os.system('ditto "%s.app.dSYM" "%s"' % (name,archive_dsym))
+	
+	# plist processing time - this is the biggest difference from XC3.
+	archive_info_plist = os.path.join(archive_bundle,'Info.plist')
+	log.write("Writing archive plist to: %s\n\n" % archive_info_plist)
+	
+	# load existing plist values so that we can use them in generating the archive
+	# plist
+	os.system('/usr/bin/plutil -convert xml1 -o "%s" "%s"' % (os.path.join(archive_bundle,'Info.xml.plist'),os.path.join(archive_app,'Info.plist')))
+	project_info_plist = plistlib.readPlist(os.path.join(archive_bundle,'Info.xml.plist'))
+	appbundle = "Applications/%s.app" % name
+	# NOTE: We chop off the end '.' of 'CFBundleVersion' to provide the 'short' version
+	version = project_info_plist['CFBundleVersion']
+	app_version_ = version.split('.')
+	if(len(app_version_) > 3):
+		version = app_version_[0]+'.'+app_version_[1]+'.'+app_version_[2]	
+	archive_info = {
+		'ApplicationProperties' : {
+			'ApplicationPath' : appbundle,
+			'CFBundleIdentifier' : project_info_plist['CFBundleIdentifier'],
+			'CFBundleShortVersionString' : version,
+			'IconPaths' : [os.path.join(appbundle,icon), os.path.join(appbundle,icon)]
+		},
+		'ArchiveVersion' : float(1),
+		'CreationDate' : datetime.datetime.utcnow(),
+		'Name' : name,
+		'SchemeName' : name
+	}
+	
+	# write out the archive plist and clean up
+	log.write("%s\n\n" % archive_info)
+	plistlib.writePlist(archive_info,archive_info_plist)
+	os.remove(os.path.join(archive_bundle,'Info.xml.plist'))
+	
+	# Workaround for dumb xcode4 bug that doesn't update the organizer unless
+	# files are touched in a very specific manner
+	temp = os.path.join(os.path.expanduser("~/Library/Developer/Xcode/Archives"),"temp")
+	os.rename(archive_bundle,temp)
+	os.rename(temp,archive_bundle)
 
 HEADER = """/**
 * Appcelerator Titanium Mobile
@@ -395,48 +396,6 @@ def copy_tiapp_properties(project_dir):
 		shutil.copyfile('ApplicationDefaults.m',appl_default)
 		os.remove('ApplicationDefaults.m')
 		return True
-	
-
-def cleanup_app_logfiles(tiapp, log_id, iphone_version):
-	print "[DEBUG] finding old log files"
-	sys.stdout.flush()
-	simulator_dir = os.path.expanduser('~/Library/Application Support/iPhone Simulator/%s' % iphone_version)
-
-	# No need to clean if the directory doesn't exist
-	if not os.path.exists(simulator_dir):
-		return
-
-	results = None
-
-	# If the indexer is enabled, we can use spotlight for faster searching
-	if is_indexing_enabled(tiapp, simulator_dir):
-		print "[DEBUG] Searching for old log files with mdfind..."
-		sys.stdout.flush()
-		results = run.run(['mdfind',
-			'-onlyin', simulator_dir,
-			'-name', '%s.log' % log_id
-		], True)
-
-	# Indexer is disabled, revert to manual crawling
-	if results == None:
-		print "[DEBUG] Searching for log files without mdfind..."
-		sys.stdout.flush()
-		def find_all_log_files(folder, fname):
-			results = []
-			for root, dirs, files in os.walk(os.path.expanduser(folder)):
-				for file in files:
-					if fname==file:
-						fullpath = os.path.join(root, file)
-						results.append(fullpath)
-			return results
-		for f in find_all_log_files(simulator_dir, '%s.log' % log_id):
-			print "[DEBUG] removing old log file: %s" % f
-			sys.stdout.flush()
-			os.remove(f)
-	else:
-		for i in results.splitlines(False):
-			print "[DEBUG] removing old log file: %s" % i
-			os.remove(i)
 
 #
 # this script is invoked from our tooling but you can run from command line too if 
@@ -537,9 +496,11 @@ def main(args):
 
 	elif command in ['install', 'adhoc']:
 		iphone_version = check_iphone_sdk(iphone_version)
-		devicefamily = dequote(args[6].decode("utf-8"))
 		link_version = iphone_version
 		dist_keychain = None
+		appuuid = dequote(args[6].decode("utf-8"))
+		dist_name = dequote(args[7].decode("utf-8"))
+		devicefamily = dequote(args[8].decode("utf-8"))
 		if command == 'install':
 			target = 'Debug'
 			deploytype = 'test'
@@ -703,7 +664,7 @@ def main(args):
 					custom_fonts.append(f)
 				
 
-		if (command == 'distribute'):
+		if not (simulator or build_only):
 			version = ti.properties['version']
 			# we want to make sure in debug mode the version always changes
 			version = "%s.%d" % (version,time.time())
@@ -712,7 +673,7 @@ def main(args):
 			pp = os.path.expanduser("~/Library/MobileDevice/Provisioning Profiles/%s.mobileprovision" % appuuid)
 			provisioning_profile = read_provisioning_profile(pp,o)
 
-			create_info_plist(ti, template_dir, project_dir, infoplist)
+		create_info_plist(ti, template_dir, project_dir, infoplist)
 
 		applogo = None
 		clean_build = False
@@ -1135,7 +1096,7 @@ def main(args):
 			# build the final release distribution
 			args = []
 
-			if command in ['distribute']:
+			if command not in ['simulator', 'build']:
 				# allow the project to have its own custom entitlements
 				custom_entitlements = os.path.join(project_dir,"Entitlements.plist")
 				entitlements_contents = None
@@ -1177,8 +1138,6 @@ def main(args):
 				# in which case we get our logging jacked - we need to remove
 				# them before running the simulator
 
-				#cleanup_app_logfiles(ti, log_id, iphone_version)
-
 				script_ok = True
 				
 			###########################################################################	
@@ -1193,10 +1152,36 @@ def main(args):
 				debugstr = ''
 				if debughost:
 					debugstr = 'DEBUGGER_ENABLED=1'
-				
+					
+				args += [
+					"GCC_PREPROCESSOR_DEFINITIONS=DEPLOYTYPE=test TI_TEST=1 %s %s" % (debugstr, kroll_coverage),
+					"PROVISIONING_PROFILE=%s" % appuuid
+				]
+
+				if command == 'install':
+					args += ["CODE_SIGN_IDENTITY=%s" % dist_name]
+				elif command == 'adhoc':
+					args += ["CODE_SIGN_IDENTITY=%s" % dist_name]
+
+				if dist_keychain is not None:
+					args += ["OTHER_CODE_SIGN_FLAGS=--keychain %s" % dist_keychain]
+
 				args += ["DEPLOYMENT_POSTPROCESSING=YES"]
 
 				execute_xcode("iphoneos%s" % iphone_version,args,False)
+
+				if command == 'adhoc':
+					dev_path = run.run(['xcode-select','-print-path'],True,False).rstrip()
+					package_path = os.path.join(dev_path,'Platforms/iPhoneOS.platform/Developer/usr/bin/PackageApplication')
+
+					ipa = os.path.join(project_dir,"%s.ipa" % name)
+					if os.path.exists(package_path):
+						output = run.run([package_path,app_dir,"-o",ipa],True)
+
+					print "[INFO] IPA file should be at %s" % ipa
+
+					o.write("Finishing build\n")
+					script_ok = True
 				
 				script_ok = True
 				
@@ -1238,6 +1223,30 @@ def main(args):
 				script_ok = True
 				
 				run_postbuild()
+
+				'''
+				distribute_xc4(name, applogo, o)
+
+				# open xcode + organizer after packaging
+				# Have to force the right xcode open...
+				xc_path = run.run(['xcode-select','-print-path'],True,False).rstrip()
+				xc_app_index = xc_path.find('/Xcode.app/')
+				if (xc_app_index >= 0):
+					xc_path = xc_path[0:xc_app_index+10]
+				else:
+					xc_path = os.path.join(xc_path,'Applications','Xcode.app')
+				o.write("Launching xcode: %s\n" % xc_path)
+				os.system('open -a %s' % xc_path)
+				
+				ass = os.path.join(template_dir,'xcode_organizer.scpt')
+				cmd = "osascript \"%s\"" % ass
+				os.system(cmd)
+				
+				o.write("Finishing build\n")
+				script_ok = True
+				
+				run_postbuild()
+				'''
 
 			###########################################################################	
 			# END OF DISTRIBUTE COMMAND	
