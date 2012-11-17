@@ -22,7 +22,8 @@
 	"dependencies": {
 		"xml2js": ">=0.2.0",
 		"colors": ">=0.6.0-1",
-		"optimist": ">=0.3.4"
+		"optimist": ">=0.3.4",
+		"plist":">=0.4.1"
 	},
 	"license":"Apache Public License v2",
 	"bin": {
