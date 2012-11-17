@@ -1033,7 +1033,7 @@ def main(args):
 				# smart enough to pick up these changes (since the PCH file hasn't 'changed').
 				run.run(['touch', '%s_Prefix.pch' % ti.properties['name']], debug=False)
 				
-				print "[INFO] Siently building..."
+				print "[INFO] Silently building..."
 				sys.stdout.flush()
 
 				output = run.run(args,False,False,o)
