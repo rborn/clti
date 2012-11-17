@@ -572,7 +572,11 @@ def main(args):
 		force_destroy_build = command!='simulator'
 
 		detector = ModuleDetector(project_dir)
-		missing_modules, modules = detector.find_app_modules(ti, 'iphone')
+		if 'deploytype' in locals():
+			# starting 2.1.4
+			missing_modules, modules = detector.find_app_modules(ti, 'iphone', deploytype)			
+		else 
+			missing_modules, modules = detector.find_app_modules(ti, 'iphone')
 		module_lib_search_path, module_asset_dirs = locate_modules(modules, project_dir, app_dir, log)
 		common_js_modules = []
 		
@@ -1155,13 +1159,10 @@ def main(args):
 					
 				args += [
 					"GCC_PREPROCESSOR_DEFINITIONS=DEPLOYTYPE=test TI_TEST=1 %s %s" % (debugstr, kroll_coverage),
-					"PROVISIONING_PROFILE=%s" % appuuid
+					"PROVISIONING_PROFILE=%s" % appuuid,
+					"CODE_SIGN_IDENTITY=%s" % dist_name,
+					"DEPLOYMENT_POSTPROCESSING=YES"
 				]
-
-				if command == 'install':
-					args += ["CODE_SIGN_IDENTITY=%s" % dist_name]
-				elif command == 'adhoc':
-					args += ["CODE_SIGN_IDENTITY=%s" % dist_name]
 
 				if dist_keychain is not None:
 					args += ["OTHER_CODE_SIGN_FLAGS=--keychain %s" % dist_keychain]
@@ -1170,19 +1171,17 @@ def main(args):
 
 				execute_xcode("iphoneos%s" % iphone_version,args,False)
 
-				if command == 'adhoc':
-					dev_path = run.run(['xcode-select','-print-path'],True,False).rstrip()
-					package_path = os.path.join(dev_path,'Platforms/iPhoneOS.platform/Developer/usr/bin/PackageApplication')
+				#if command == 'adhoc':
+				dev_path = run.run(['xcode-select','-print-path'],True,False).rstrip()
+				package_path = os.path.join(dev_path,'Platforms/iPhoneOS.platform/Developer/usr/bin/PackageApplication')
 
-					ipa = os.path.join(project_dir,"%s.ipa" % name)
-					if os.path.exists(package_path):
-						output = run.run([package_path,app_dir,"-o",ipa],True)
+				ipa = os.path.join(project_dir,"%s.ipa" % name)
+				if os.path.exists(package_path):
+					output = run.run([package_path,app_dir,"-o",ipa],True)
 
-					print "[INFO] IPA file should be at %s" % ipa
+				print "[INFO] IPA file should be at %s" % ipa
 
-					o.write("Finishing build\n")
-					script_ok = True
-				
+				o.write("Finishing build\n")
 				script_ok = True
 				
 				run_postbuild()
